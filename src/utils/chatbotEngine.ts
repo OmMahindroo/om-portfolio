@@ -11,6 +11,7 @@ export function getBotResponse(userMessage: string): BotResponse {
 
   // Helper matching functions
   const containsAny = (keywords: string[]) => keywords.some(k => query.includes(k));
+  const hasWord = (word: string) => new RegExp(`\\b${word.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i').test(query);
 
   // 1. Projects - AI Website Builder
   if (containsAny(["website builder", "web builder", "builder", "gpt-4o", "generative ai", "code generation", "llm project"])) {
@@ -104,7 +105,7 @@ ${aiSkills.map(s => `- **${s}**`).join("\n")}
   }
 
   // 6. Skills - Languages
-  if (containsAny(["languages", "programming language", "python", "typescript", "c++", "c", "sql", "code"])) {
+  if (containsAny(["languages", "programming language", "python", "typescript", "c++", "sql", "code"]) || hasWord("c")) {
     const langSkills = resumeData.skills.find(s => s.category === "Languages")?.skills || [];
     return {
       answer: `### **Programming Languages**
@@ -165,7 +166,7 @@ ${item.description}`).join("\n\n")}`,
   }
 
   // 10. Contact Info
-  if (containsAny(["contact", "email", "mail", "phone", "location", "address", "linkedin", "github", "hire", "resume"])) {
+  if (containsAny(["contact", "cintact", "conatct", "email", "mail", "phone", "location", "address", "linkedin", "github", "hire", "resume", "tact", "connect"])) {
     return {
       answer: `### **Contact & Professional Links**
 You can connect with Om Mahindroo directly via:
