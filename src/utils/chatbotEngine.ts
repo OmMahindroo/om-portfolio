@@ -8,10 +8,10 @@ export interface BotResponse {
 
 export function getBotResponse(userMessage: string): BotResponse {
   const query = userMessage.toLowerCase().trim();
+  const words = query.split(/[\s,?.!/\\()\[\]{}#:]+/);
 
   // Helper matching functions
   const containsAny = (keywords: string[]) => keywords.some(k => query.includes(k));
-  const hasWord = (word: string) => new RegExp(`\\b${word.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i').test(query);
 
   // 1. Projects - AI Website Builder
   if (containsAny(["website builder", "web builder", "builder", "gpt-4o", "generative ai", "code generation", "llm project"])) {
@@ -105,7 +105,7 @@ ${aiSkills.map(s => `- **${s}**`).join("\n")}
   }
 
   // 6. Skills - Languages
-  if (containsAny(["languages", "programming language", "python", "typescript", "c++", "sql", "code"]) || hasWord("c")) {
+  if (containsAny(["languages", "programming language", "python", "typescript", "c++", "sql", "code"]) || words.includes("c")) {
     const langSkills = resumeData.skills.find(s => s.category === "Languages")?.skills || [];
     return {
       answer: `### **Programming Languages**
