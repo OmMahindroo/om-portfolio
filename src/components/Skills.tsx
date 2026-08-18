@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, HTMLMotionProps } from "framer-motion";
-import { Cpu, Code2, Layers } from "lucide-react";
+import { Cpu, Code2, Layers, Database } from "lucide-react";
 import { resumeData } from "../data/resumeData";
 
 export default function Skills() {
@@ -27,19 +27,33 @@ export default function Skills() {
         {/* Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {resumeData.skills.map((categoryObj, index) => {
-            const icons = [Cpu, Code2, Layers];
+            const icons = [Cpu, Code2, Layers, Database];
             const IconComponent = icons[index % icons.length];
-            const isFirst = index === 0;
+            const isLarge = index === 0 || index === 3;
 
-            const gridClass = isFirst 
+            const gridClass = isLarge 
               ? "md:col-span-2 md:row-span-1" 
               : "md:col-span-1";
+
+            const glowColorMap = [
+              "rgba(16,185,129,0.12)", // emerald (Core AI)
+              "rgba(6,182,212,0.12)",  // cyan (Languages)
+              "rgba(59,130,246,0.12)",  // blue (Web Infrastructure)
+              "rgba(139,92,246,0.12)"   // violet (Data Science & ML)
+            ];
+
+            const textColorMap = [
+              "text-emerald-400 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.2)]",
+              "text-cyan-400 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]",
+              "text-blue-400 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.2)]",
+              "text-violet-400 group-hover:shadow-[0_0_15px_rgba(139,92,246,0.2)]"
+            ];
 
             return (
               <GlowCard 
                 key={categoryObj.category}
                 className={`${gridClass} group relative p-8 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 backdrop-blur-md overflow-hidden transition-colors duration-500 hover:bg-zinc-900/60`}
-                glowColor={isFirst ? "rgba(16,185,129,0.12)" : index === 1 ? "rgba(6,182,212,0.12)" : "rgba(59,130,246,0.12)"}
+                glowColor={glowColorMap[index % glowColorMap.length]}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 + index * 0.15 }}
@@ -48,13 +62,7 @@ export default function Skills() {
                   <div className="space-y-4">
                     {/* Header */}
                     <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl border border-zinc-800 bg-zinc-950 ${
-                        isFirst 
-                          ? "text-emerald-400 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.2)]" 
-                          : index === 1 
-                          ? "text-cyan-400 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]" 
-                          : "text-blue-400 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.2)]"
-                      } transition-all duration-300`}>
+                      <div className={`p-2.5 rounded-xl border border-zinc-800 bg-zinc-950 ${textColorMap[index % textColorMap.length]} transition-all duration-300`}>
                         <IconComponent className="w-5 h-5" />
                       </div>
                       <h3 className="text-xl font-semibold text-white tracking-wide">
@@ -63,11 +71,13 @@ export default function Skills() {
                     </div>
 
                     <p className="text-xs sm:text-sm text-zinc-400 font-light leading-relaxed">
-                      {isFirst 
-                        ? "Deep neural layers, language engineering models, and inferencing architecture optimizations."
+                      {index === 0 
+                        ? "Local and cloud-served language models, custom AI agents, prompt/context engineering, and inference optimizations."
                         : index === 1
-                        ? "Core language foundations spanning systems engineering to responsive application layers."
-                        : "Distributed hosting, web servers, state synchronization, and styling tools."}
+                        ? "Core languages spanning system-level C/C++ engineering to web script formatting."
+                        : index === 2
+                        ? "Modern frameworks, reactive components, automated styling, and deployment setups."
+                        : "Retrieval-Augmented Generation (RAG), vector storage indices, data wrangling, exploratory statistical analysis, and ML ensembles."}
                     </p>
                   </div>
 

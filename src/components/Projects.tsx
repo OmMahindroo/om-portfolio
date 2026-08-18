@@ -185,6 +185,21 @@ export default function Projects() {
                                 ))}
                               </div>
                             </div>
+
+                            {/* Live Demo Link */}
+                            {project.liveUrl && (
+                              <div className="pt-4 border-t border-zinc-900/60">
+                                <a 
+                                  href={project.liveUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="group flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl border border-zinc-850 bg-zinc-950 text-white font-medium text-xs font-mono transition-all duration-300 hover:border-emerald-500/50 hover:bg-zinc-900 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5 text-emerald-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                  Launch System
+                                </a>
+                              </div>
+                            )}
                           </div>
 
                         </div>

@@ -7,6 +7,7 @@ export interface Project {
   metrics: { label: string; value: string }[];
   bulletPoints: string[];
   patentStatus?: string;
+  liveUrl?: string;
 }
 
 export interface SkillCategory {
@@ -52,29 +53,42 @@ export const resumeData: ResumeData = {
       category: "Core AI/ML",
       skills: [
         "Large Language Models (LLMs)",
-        "OpenAI GPT-4o API",
-        "YOLOv8",
-        "CNNs & GANs",
-        "Prompt Engineering",
+        "Ollama (Local LLMs)",
+        "OpenAI GPT-4o & Anthropic Claude APIs",
+        "AI Agents & Fine-Tuning",
+        "Prompt & Context Engineering",
+        "YOLOv8 & CNNs",
         "Model Inference Optimization"
       ]
     },
     {
       category: "Languages",
-      skills: ["Python", "TypeScript", "SQL", "C++", "C"]
+      skills: ["Python", "TypeScript", "SQL (Window Functions)", "C++", "C"]
     },
     {
       category: "Infrastructure & Web",
-      skills: ["Next.js", "Node.js", "Express", "Tailwind CSS", "shadcn/ui", "Git & Docker"]
+      skills: ["Next.js", "Node.js", "Express", "Tailwind CSS", "shadcn/ui", "Docker & Git"]
+    },
+    {
+      category: "Data & Machine Learning",
+      skills: [
+        "Retrieval-Augmented Generation (RAG)",
+        "Vector Databases (Pinecone/Chroma)",
+        "Exploratory Data Analysis (EDA)",
+        "Supervised Ensembles (Random Forest, XGBoost)",
+        "Dimensionality Reduction (PCA)",
+        "Feature Engineering & Pipelines"
+      ]
     }
   ],
   projects: [
     {
       title: "AI - Website Builder",
       tagline: "Generative AI Code Pipeline",
+      liveUrl: "https://aiweb-builder.netlify.app/",
       description: "A state-of-the-art Generative AI pipeline utilizing OpenAI's GPT-4o model to turn natural language instructions into fully functional structured code in real-time.",
-      longDescription: "Engineered an intelligent website creation platform using Next.js. The backend harnesses the GPT-4o engine via custom prompt flows, managing multi-step code generation. Implemented visual trees, automated preview renders, and granular state synchronization.",
-      techStack: ["Next.js", "TypeScript", "OpenAI GPT-4o API", "Node.js", "Tailwind CSS", "Zustand"],
+      longDescription: "Engineered an intelligent website creation platform using Next.js. The backend harnesses the GPT-4o engine via custom prompt flows, managing multi-step code generation. Implemented visual trees, automated preview renders, and granular state synchronization. Optimized prompts and contexts using Cursor and Claude Code workspace environments.",
+      techStack: ["Next.js", "TypeScript", "OpenAI GPT-4o API", "Claude Code & Cursor", "Tailwind CSS", "Zustand", "Context Engineering"],
       metrics: [
         { label: "Generation Speed", value: "< 4.5s" },
         { label: "Code Accuracy", value: "94.2%" },

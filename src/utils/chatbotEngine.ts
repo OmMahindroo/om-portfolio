@@ -20,6 +20,8 @@ export function getBotResponse(userMessage: string): BotResponse {
       answer: `### **${proj?.title}** (${proj?.tagline})
 ${proj?.longDescription}
 
+**Live Demo URL:** [aiweb-builder.netlify.app](${proj?.liveUrl})
+
 **Technical Bullet Points:**
 ${proj?.bulletPoints.map(bp => `- ${bp}`).join("\n")}
 
@@ -90,17 +92,17 @@ ${proj?.metrics.map(m => `- **${m.label}**: ${m.value}`).join("\n")}
   }
 
   // 5. Skills - Core AI/ML
-  if (containsAny(["ai", "ml", "machine learning", "deep learning", "nlp", "yolov8", "cnn", "gan", "models", "prompt engineering", "inference"])) {
-    const aiSkills = resumeData.skills.find(s => s.category.includes("AI/ML"))?.skills || [];
+  if (containsAny(["ai", "ml", "machine learning", "deep learning", "nlp", "yolov8", "cnn", "gan", "models", "prompt engineering", "inference", "ollama", "claude", "assistants", "agents"])) {
+    const aiSkills = resumeData.skills.find(s => s.category.includes("Core AI"))?.skills || [];
     return {
       answer: `### **Core AI/ML Expertise**
-Om specializes in applying large language models and computer vision pipelines to solve complex problems:
+Om specializes in prompt engineering, context management, local LLM serving, and model optimization:
 
 ${aiSkills.map(s => `- **${s}**`).join("\n")}
 
-*Om is experienced in prompt optimization, LLM context windows, real-time image recognition (YOLOv8), and running low-latency inference on edge nodes.*`,
+*Om is experienced in context engineering using Claude Code & Cursor workspace tools, managing local LLMs via Ollama, fine-tuning, and running model inference optimizations.*`,
       topic: "AI/ML Skills",
-      suggestions: ["What programming languages does he know?", "Tell me about the AI Website Builder", "How can I contact Om?"]
+      suggestions: ["Show Data & Machine Learning skills", "Tell me about the AI Website Builder", "What programming languages does he know?"]
     };
   }
 
@@ -131,6 +133,21 @@ ${webSkills.map(s => `- **${s}**`).join("\n")}
 *His web development focus is on React/Next.js for aesthetic and interactive user experiences, combined with Express/Node.js for backend microservices and data pipelines.*`,
       topic: "Infrastructure & Web Skills",
       suggestions: ["What projects has he built?", "Summarize Om's AI Skills", "Tell me about his education"]
+    };
+  }
+
+  // 12. Skills - Data Science & Machine Learning
+  if (containsAny(["data science", "data wrangling", "eda", "exploratory data", "xgboost", "random forest", "pca", "dimension", "feature engineering", "rag", "vector database", "vector db", "pinecone", "chroma", "hugging face", "huggingface", "statistics", "calculus", "probability", "linear algebra"])) {
+    const dsSkills = resumeData.skills.find(s => s.category.includes("Data & Machine"))?.skills || [];
+    return {
+      answer: `### **Data Science & Machine Learning**
+Om holds strong experience in data preprocessing, exploratory analysis, and training classical ML ensembles:
+
+${dsSkills.map(s => `- **${s}**`).join("\n")}
+
+*He applies solid statistical modeling, linear algebra, vector databases (Chroma/Pinecone), RAG architectures, and custom feature engineering pipelines to enhance ML model accuracy.*`,
+      topic: "Data Science & ML Skills",
+      suggestions: ["Show core AI/ML skills", "What projects has he built?", "How can I contact Om?"]
     };
   }
 
