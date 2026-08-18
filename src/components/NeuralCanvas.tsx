@@ -13,155 +13,209 @@ export default function NeuralCanvas() {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let particles: Particle[] = [];
-    let mouse = { x: -1000, y: -1000, radius: 150 };
+    let dashes: DashParticle[] = [];
+    let dust: DustParticle[] = [];
+    let mouse = { x: -1000, y: -1000, radius: 250 };
+    let time = 0;
 
-    // Particle definition
-    class Particle {
+    // Dust Particle (micro starry noise in the background)
+    class DustParticle {
       x: number;
       y: number;
-      vx: number;
-      vy: number;
-      baseRadius: number;
-      radius: number;
-      color: string;
+      size: number;
+      opacity: number;
+      speed: number;
 
       constructor(w: number, h: number) {
         this.x = Math.random() * w;
         this.y = Math.random() * h;
-        // Slow speed for clean aesthetics
-        this.vx = (Math.random() - 0.5) * 0.45;
-        this.vy = (Math.random() - 0.5) * 0.45;
-        this.baseRadius = Math.random() * 1.5 + 1;
-        this.radius = this.baseRadius;
-        this.color = "rgba(56, 189, 248, 0.4)"; // Subtle sky-400 cyan
+        this.size = Math.random() * 1.0 + 0.3;
+        this.opacity = Math.random() * 0.25 + 0.05;
+        this.speed = Math.random() * 0.08 + 0.02;
       }
 
       update(w: number, h: number) {
-        // Bounce on borders
-        if (this.x < 0 || this.x > w) this.vx = -this.vx;
-        if (this.y < 0 || this.y > h) this.vy = -this.vy;
-
-        this.x += this.vx;
-        this.y += this.vy;
-
-        // Interaction with mouse
-        const dx = mouse.x - this.x;
-        const dy = mouse.y - this.y;
-        const dist = Math.hypot(dx, dy);
-
-        if (dist < mouse.radius) {
-          // Attract/Push effect
-          const force = (mouse.radius - dist) / mouse.radius;
-          this.x -= (dx / dist) * force * 0.8;
-          this.y -= (dy / dist) * force * 0.8;
-          this.radius = this.baseRadius + force * 1.5;
-        } else {
-          if (this.radius > this.baseRadius) {
-            this.radius -= 0.1;
-          }
+        this.y -= this.speed;
+        if (this.y < 0) {
+          this.y = h;
+          this.x = Math.random() * w;
         }
       }
 
       draw(c: CanvasRenderingContext2D) {
+        c.fillStyle = `rgba(244, 244, 245, ${this.opacity})`;
         c.beginPath();
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        c.fillStyle = this.color;
+        c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         c.fill();
       }
     }
 
-    // Initialize particles
+    // Magnetic Dash Particle (resembles the Antigravity dashboard wave)
+    class DashParticle {
+      x: number;
+      y: number;
+      baseX: number;
+      baseY: number;
+      length: number;
+      width: number;
+      angle: number;
+      targetAngle: number;
+      color: string;
+      glowColor: string;
+      opacity: number;
+      speedOffset: number;
+
+      constructor(x: number, y: number, w: number, h: number) {
+        this.x = x;
+        this.y = y;
+        this.baseX = x;
+        this.baseY = y;
+        this.length = Math.random() * 6 + 6; // 6px to 12px long
+        this.width = Math.random() * 1.2 + 1.2; // 1.2px to 2.4px thick
+        this.angle = 0;
+        this.targetAngle = 0;
+        this.opacity = Math.random() * 0.35 + 0.15;
+        this.speedOffset = Math.random() * 0.02;
+
+        // Calculate color gradient based on spatial coordinate
+        const ratio = x / w;
+        const yRatio = y / h;
+        
+        // Sky Blue (#38bdf8) -> Indigo (#6366f1) -> Pink (#ec4899)
+        if (ratio < 0.35) {
+          // Blue/Teal spectrum
+          this.color = `rgba(56, 189, 248, ${this.opacity})`;
+          this.glowColor = "rgba(56, 189, 248, 0.4)";
+        } else if (ratio < 0.65) {
+          // Indigo spectrum
+          this.color = `rgba(99, 102, 241, ${this.opacity})`;
+          this.glowColor = "rgba(99, 102, 241, 0.4)";
+        } else {
+          // Pink/Purple spectrum
+          this.color = `rgba(236, 72, 153, ${this.opacity})`;
+          this.glowColor = "rgba(236, 72, 153, 0.4)";
+        }
+      }
+
+      update(w: number, h: number, t: number) {
+        // 1. Slow fluid flow oscillation using wave functions
+        const waveX = Math.sin(t * 0.5 + this.baseY * 0.003) * 15;
+        const waveY = Math.cos(t * 0.4 + this.baseX * 0.003) * 15;
+        this.x = this.baseX + waveX;
+        this.y = this.baseY + waveY;
+
+        // 2. Flow field base angle (curved trajectory flowing from bottom-left to top-right)
+        const baseFlowAngle = Math.sin(this.x * 0.002 + this.y * 0.0015 + t * 0.2) * 0.4 + Math.PI / 4;
+        this.targetAngle = baseFlowAngle;
+
+        // 3. Mouse attraction and magnetic orientation (torque)
+        const dx = mouse.x - this.x;
+        const db = mouse.y - this.y;
+        const dist = Math.hypot(dx, db);
+
+        let activeOpacity = this.opacity;
+
+        if (dist < mouse.radius) {
+          const force = (mouse.radius - dist) / mouse.radius;
+          
+          // Re-orient (torque) towards the mouse coordinates
+          const angleToMouse = Math.atan2(db, dx);
+          this.targetAngle = angleToMouse + Math.PI / 2; // perpendicular or aligned
+
+          // Increase brightness/opacity near the cursor
+          activeOpacity = Math.min(1.0, this.opacity + force * 0.4);
+
+          // Subtle pull/push displacement
+          this.x += (dx / dist) * force * 15;
+          this.y += (db / dist) * force * 15;
+        }
+
+        // Smoothly interpolate current angle towards target angle
+        const angleDiff = this.targetAngle - this.angle;
+        this.angle += angleDiff * 0.08;
+      }
+
+      draw(c: CanvasRenderingContext2D) {
+        c.save();
+        c.translate(this.x, this.y);
+        c.rotate(this.angle);
+
+        // Draw the magnetic vector line
+        c.beginPath();
+        c.moveTo(-this.length / 2, 0);
+        c.lineTo(this.length / 2, 0);
+        
+        c.strokeStyle = this.color;
+        c.lineWidth = this.width;
+        c.lineCap = "round";
+
+        // Add a subtle glow on hover
+        const dx = mouse.x - this.x;
+        const db = mouse.y - this.y;
+        if (Math.hypot(dx, db) < mouse.radius * 0.6) {
+          c.shadowColor = this.glowColor;
+          c.shadowBlur = 4;
+        }
+
+        c.stroke();
+        c.restore();
+      }
+    }
+
+    // Initialize particles in a flow pattern
     const init = () => {
       const w = (canvas.width = window.innerWidth);
       const h = (canvas.height = window.innerHeight);
-      
-      // Responsive particle count
-      let particleCount = Math.floor((w * h) / 14000);
-      if (particleCount > 120) particleCount = 120;
-      if (particleCount < 40) particleCount = 40;
 
-      particles = [];
-      for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle(w, h));
+      // 1. Generate background dust
+      dust = [];
+      const dustCount = Math.floor((w * h) / 10000);
+      for (let i = 0; i < dustCount; i++) {
+        dust.push(new DustParticle(w, h));
       }
-    };
 
-    // Draw lines between nearby particles
-    const drawLines = (c: CanvasRenderingContext2D) => {
-      const maxDistance = 110;
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.hypot(dx, dy);
+      // 2. Generate vector dash points structured in a density wave
+      dashes = [];
+      const columns = Math.floor(w / 50);
+      const rows = Math.floor(h / 50);
 
-          if (dist < maxDistance) {
-            const opacity = (1 - dist / maxDistance) * 0.12;
-            c.beginPath();
-            c.moveTo(particles[i].x, particles[i].y);
-            c.lineTo(particles[j].x, particles[j].y);
-            
-            // Slate/emerald gradient-like color scheme
-            c.strokeStyle = `rgba(148, 163, 184, ${opacity})`; 
-            c.lineWidth = 0.6;
-            c.stroke();
+      for (let c = 0; c < columns; c++) {
+        for (let r = 0; r < rows; r++) {
+          // Add random jitter to coordinates for a natural fluid distribution
+          const jitterX = (Math.random() - 0.5) * 20;
+          const jitterY = (Math.random() - 0.5) * 20;
+          const x = c * 50 + 25 + jitterX;
+          const y = r * 50 + 25 + jitterY;
+
+          // Denser clustering on the left side of the screen to mimic the reference image
+          const isDensityCluster = Math.random() < (1.0 - (x / w) * 0.7);
+
+          if (isDensityCluster) {
+            dashes.push(new DashParticle(x, y, w, h));
           }
         }
-
-        // Draw connections to mouse
-        const dx = particles[i].x - mouse.x;
-        const dy = particles[i].y - mouse.y;
-        const dist = Math.hypot(dx, dy);
-
-        if (dist < mouse.radius) {
-          const opacity = (1 - dist / mouse.radius) * 0.18;
-          c.beginPath();
-          c.moveTo(particles[i].x, particles[i].y);
-          c.lineTo(mouse.x, mouse.y);
-          c.strokeStyle = `rgba(16, 185, 129, ${opacity})`; // Subtle emerald glow near mouse
-          c.lineWidth = 0.7;
-          c.stroke();
-        }
       }
     };
 
-    // Animation Loop
+    // Animation loop
     const animate = () => {
       if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      time += 0.01;
 
-      // Web aesthetic backdrop grid lines
-      drawGrid(ctx, canvas.width, canvas.height);
+      // Draw dust
+      dust.forEach((d) => {
+        d.update(canvas.width, canvas.height);
+        d.draw(ctx);
+      });
 
-      particles.forEach((p) => {
-        p.update(canvas.width, canvas.height);
+      // Draw magnetic dashes
+      dashes.forEach((p) => {
+        p.update(canvas.width, canvas.height, time);
         p.draw(ctx);
       });
 
-      drawLines(ctx);
-
       animationFrameId = requestAnimationFrame(animate);
-    };
-
-    // Subtly draw a grid overlay
-    const drawGrid = (c: CanvasRenderingContext2D, w: number, h: number) => {
-      c.strokeStyle = "rgba(39, 39, 42, 0.2)"; // zinc-800 subtle grid
-      c.lineWidth = 1;
-      const gridSize = 80;
-
-      for (let x = 0; x < w; x += gridSize) {
-        c.beginPath();
-        c.moveTo(x, 0);
-        c.lineTo(x, h);
-        c.stroke();
-      }
-      for (let y = 0; y < h; y += gridSize) {
-        c.beginPath();
-        c.moveTo(0, y);
-        c.lineTo(w, y);
-        c.stroke();
-      }
     };
 
     // Event listeners
@@ -183,11 +237,11 @@ export default function NeuralCanvas() {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseleave", handleMouseLeave);
 
-    // Initial setup
+    // Run
     init();
     animate();
 
-    // Cleanup
+    // Cleanups
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
